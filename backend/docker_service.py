@@ -78,8 +78,10 @@ def execute_docker_action(data):
     # ----------------------------
     elif action == "logs":
 
-        name = data.get("name")
-
+        name = data.get("name") or data.get("container")
+        
+        if not name :
+        	return {"status" : "error","message": "Details required"}
         try:
             container = client.containers.get(name)
             logs = container.logs().decode("utf-8")
