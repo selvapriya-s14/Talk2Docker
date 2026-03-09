@@ -27,7 +27,7 @@ def chat():
     if llm_output["type"] == "chat":
         return jsonify({
             "status": "success",
-            "response": llm_output["message"]
+            "message": llm_output["message"]
         })
 
     # If AI decides it's a Docker command
