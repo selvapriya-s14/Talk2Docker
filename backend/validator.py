@@ -2,10 +2,26 @@ import json
 
 ALLOWED_ACTIONS = [
     "run",
-    "list_images",
+    "stop",
+    "restart",
+    "remove_container",
     "list_containers",
+    "inspect_container",
     "logs",
-    "stop"
+    "exec",
+    "pause",
+    "unpause",
+    "list_images",
+    "pull_image",
+    "remove_image",
+    "inspect_image",
+    "tag_image",
+    "system_info",
+    "system_df",
+    "prune_containers",
+    "prune_images",
+    "list_networks",
+    "list_volumes"
 ]
 
 def validate(data):
