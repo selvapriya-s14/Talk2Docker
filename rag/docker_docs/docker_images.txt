@@ -1,0 +1,38 @@
+Docker Images
+
+Docker images are read-only templates used to create containers.
+
+Images are built using Dockerfiles.
+
+Common commands:
+
+List images:
+
+docker images
+
+Pull image from Docker Hub:
+
+docker pull nginx
+
+Remove image:
+
+docker rmi nginx
+
+Build image from Dockerfile:
+
+docker build -t my-app .
+
+The -t flag assigns a tag name to the image.
+
+Tag an image:
+
+docker tag my-app myrepo/my-app:latest
+
+Push image to registry:
+
+docker push myrepo/my-app
+
+Docker images consist of layers.
+
+Each Dockerfile instruction creates a new layer.
+Layers help optimize caching and image reuse.

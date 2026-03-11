@@ -1,0 +1,241 @@
+Docker Introduction and Core Concepts
+
+What is Docker?
+Docker is a platform for developing, shipping, and running applications in containers. Containers are lightweight, portable, and isolated environments that package application code with all dependencies.
+
+Key Docker Concepts:
+
+1. Images
+- A Docker image is a read-only template containing application code, libraries, and dependencies
+- Images are built from Dockerfiles using "docker build"
+- Images can be pulled from registries like Docker Hub
+- Example: nginx, redis, postgres, python:3.11
+
+2. Containers
+- A container is a running instance of an image
+- Containers are isolated processes that share the host OS kernel
+- Multiple containers can run from the same image
+- Containers are ephemeral - data is lost when container stops unless volumes are used
+
+3. Volumes
+- Volumes persist data beyond container lifecycle
+- Volumes are stored outside the container filesystem
+- Use volumes for databases, logs, and persistent application data
+- Create with: docker volume create mydata
+- Mount with: docker run -v mydata:/data myimage
+
+4. Ports
+- Containers have internal ports that need to be exposed to the host
+- Port mapping: -p HOST_PORT:CONTAINER_PORT
+- Example: -p 8080:80 maps container port 80 to host port 8080
+- Access via: http://localhost:8080
+
+Common Docker Commands:
+
+Running Containers:
+- docker run nginx - Run nginx container
+- docker run -d nginx - Run in detached (background) mode
+- docker run -p 8080:80 nginx - Run with port mapping
+- docker run --name myapp nginx - Run with custom name
+- docker run -v mydata:/data nginx - Run with volume
+
+Managing Containers:
+- docker ps - List running containers
+- docker ps -a - List all containers (including stopped)
+- docker stop CONTAINER - Stop a running container
+- docker start CONTAINER - Start a stopped container
+- docker restart CONTAINER - Restart a container
+- docker rm CONTAINER - Remove a stopped container
+
+Viewing Logs:
+- docker logs CONTAINER - View container logs
+- docker logs -f CONTAINER - Follow logs in real-time
+- docker logs --tail 100 CONTAINER - View last 100 lines
+
+Images:
+- docker images - List all images
+- docker pull IMAGE - Download image from registry
+- docker build -t myapp . - Build image from Dockerfile
+- docker rmi IMAGE - Remove an image
+- docker image prune - Remove unused images
+
+Advanced Container Management:
+
+Executing Commands in Running Containers:
+- docker exec CONTAINER command - Execute a command in a running container
+- docker exec -it CONTAINER bash - Get interactive shell in container
+- docker exec CONTAINER ls /app - List files in container's /app directory
+- docker exec CONTAINER cat /etc/config.conf - View file contents
+- docker exec CONTAINER ps aux - View processes inside container
+- Use cases: debugging, inspecting files, running scripts, checking logs
+
+Inspecting Containers and Images:
+- docker inspect CONTAINER - Get detailed JSON info about container
+- docker inspect IMAGE - Get detailed JSON info about image
+- Shows: network settings, volumes, environment variables, labels, configuration
+- Use cases: troubleshooting, automation, verifying settings
+
+Cleanup and Maintenance:
+- docker container prune - Remove all stopped containers
+- docker image prune - Remove dangling images
+- docker image prune -a - Remove all unused images
+- docker volume prune - Remove unused volumes
+- docker network prune - Remove unused networks
+- docker system prune - Remove all unused resources
+- docker system prune -a - Aggressive cleanup (containers, images, volumes, networks)
+- Best practice: Run prune commands regularly to free disk space
+
+Pulling Images from Registries:
+- docker pull nginx:latest - Pull nginx latest version
+- docker pull python:3.11 - Pull specific Python version
+- docker pull mcr.microsoft.com/mssql/server - Pull from Microsoft registry
+- docker pull myregistry.com/myapp:v1.0 - Pull from private registry
+- Images are cached locally after first pull
+
+Restarting Containers:
+- docker restart CONTAINER - Stop and start container
+- docker restart -t 10 CONTAINER - Wait 10 seconds before killing
+- Use cases: apply configuration changes, recover from errors, memory leaks
+- Restart policies: --restart always ensures container restarts on reboot
+
+Removing Containers and Images:
+- docker rm CONTAINER - Remove stopped container
+- docker rm -f CONTAINER - Force remove running container
+- docker rmi IMAGE - Remove image
+- docker rmi -f IMAGE - Force remove image
+- Cannot remove image if containers are using it
+- Remove containers first, then images
+
+Troubleshooting Common Issues:
+
+Container Keeps Restarting:
+- Check logs: docker logs CONTAINER
+- Likely causes: application crash, missing dependencies, port conflicts
+- Restart policies: --restart always, --restart on-failure, --restart unless-stopped
+
+Port Already in Use:
+- Error: "bind: address already in use"
+- Solution: Use different host port or stop conflicting service
+- Check what's using port: netstat -ano | findstr :8080
+
+Container Won't Start:
+- Check image exists: docker images
+- Verify command syntax
+- Check system resources (memory, disk space)
+- Review logs for error messages
+
+⚠️ CONTAINER CRASHES IMMEDIATELY (Exited with code 1):
+
+Common Scenario - Check docker ps -a and see:
+STATUS: "Exited (1) 2 minutes ago" or "Exited (1) About a minute ago"
+
+This means the container started but crashed immediately.
+
+**MySQL/MariaDB Crashes (COMMON ISSUE):**
+
+Problem: MySQL requires root password or explicit permission to run without password
+Error seen: "Access denied for user 'root'@'localhost' (using password: NO)"
+
+COPY-PASTE READY SOLUTIONS (choose one):
+
+OPTION 1 - MySQL with root password (RECOMMENDED):
+docker run -d --name mysql-server -e MYSQL_ROOT_PASSWORD=root123 -p 3306:3306 mysql:latest
+
+OPTION 2 - MySQL with specific version and password:
+docker run -d --name mysql-db -e MYSQL_ROOT_PASSWORD=mySecurePassword123 -e MYSQL_DATABASE=myapp -p 3306:3306 mysql:8.0
+
+OPTION 3 - Allow empty password (development only):
+docker run -d --name mysql-dev -e MYSQL_ALLOW_EMPTY_PASSWORD=yes -p 3306:3306 mysql:latest
+
+OPTION 4 - Random password generated (logs show password):
+docker run -d --name mysql-random -e MYSQL_RANDOM_ROOT_PASSWORD=yes -p 3306:3306 mysql:latest
+docker logs mysql-random (look for "GENERATED ROOT PASSWORD")
+
+OPTION 5 - MySQL with database and user credentials:
+docker run -d --name mysql-full \
+  -e MYSQL_ROOT_PASSWORD=root123 \
+  -e MYSQL_DATABASE=appdb \
+  -e MYSQL_USER=appuser \
+  -e MYSQL_PASSWORD=apppassword \
+  -p 3306:3306 \
+  mysql:latest
+
+After running, verify it's healthy:
+docker logs mysql-server (should see "MySQL init process done")
+docker ps | grep mysql (should show "Up X seconds")
+
+Connect to MySQL (replace 'root123' with your password):
+docker exec -it mysql-server mysql -uroot -proot123 -e "SELECT 1;" 
+
+Common connection details after running:
+Host: localhost or 127.0.0.1
+Port: 3306
+Username: root
+Password: (whatever you set with MYSQL_ROOT_PASSWORD)
+
+**PostgreSQL Crashes:**
+Solution with password:
+docker run -d --name postgres-db -e POSTGRES_PASSWORD=postgres123 -p 5432:5432 postgres:latest
+
+Verify:
+docker logs postgres-db (should see "database system is ready")
+docker exec -it postgres-db psql -U postgres -c "SELECT 1;"
+
+**MongoDB Crashes:**
+Solution (no password required for local dev):
+docker run -d --name mongodb -p 27017:27017 mongo:latest
+
+Verify:
+docker logs mongodb (should see "waiting for connections on port 27017")
+
+**Redis (Usually works without config):**
+Solution:
+docker run -d --name redis-server -p 6379:6379 redis:latest
+
+Verify:
+docker ps | grep redis
+
+**General Debugging Steps for Crashed Containers:**
+1. Check exact error: docker logs CONTAINER_NAME
+2. Look for "ERROR" or "FATAL" in logs
+3. Check if environment variables are missing
+4. Verify port is not already in use
+5. Check container status: docker ps -a (shows exit codes)
+6. Inspect container: docker inspect CONTAINER_NAME
+
+**Exit Codes Meaning:**
+- Exit 0: Normal exit (intended shutdown)
+- Exit 1: Application error (most common - configuration issue)
+- Exit 137: Container killed (out of memory)
+- Exit 139: Segmentation fault
+- Exit 143: Graceful termination (SIGTERM)
+
+**How to Fix Crashed Containers:**
+1. Remove crashed container: docker rm CONTAINER_NAME
+2. Fix the issue (add environment variables, change ports, etc.)
+3. Run again with correct configuration
+4. Check logs immediately after: docker logs -f CONTAINER_NAME
+
+Performance Issues:
+- Limit container resources: --memory 512m --cpus 1
+- Clean up unused containers: docker container prune
+- Clean up unused images: docker image prune
+
+Disk Space Issues:
+- Check Docker disk usage: docker system df
+- Remove stopped containers: docker container prune
+- Remove unused images: docker image prune -a
+- Remove unused volumes: docker volume prune
+- Full cleanup: docker system prune -a --volumes
+
+Best Practices:
+- Use specific image tags (nginx:1.21) instead of latest
+- Always use volumes for persistent data
+- Use environment variables for configuration
+- Keep containers stateless when possible
+- One process per container
+- Use .dockerignore to exclude unnecessary files
+- Don't run containers as root user when possible
+- Regularly clean up unused resources with prune commands
+- Use docker exec for debugging instead of SSH
+- Use docker inspect to verify container configuration

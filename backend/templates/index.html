@@ -2,97 +2,86 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Talk2Docker Chat</title>
-    <style>
-        body { font-family: Arial; background: #f5f5f5; }
-        #chat-container { width: 500px; margin: 50px auto; background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);}
-        #chat-box { height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; background: #fafafa;}
-        .message { margin: 5px 0; }
-        .user { color: #333; font-weight: bold; }
-        .bot { color: #007bff; }
-        #user-input { width: 80%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
-        #send-btn { padding: 10px 15px; border: none; background: #007bff; color: #fff; border-radius: 5px; cursor: pointer; }
-        #send-btn:hover { background: #0056b3; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talk2Docker v2 - AI Docker Agent</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <div class="container">
+        <!-- Left Sidebar - Info & Tips -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1>🐳 Talk2Docker v2</h1>
+                <p>AI-Powered Docker Agent</p>
+            </div>
+            <div class="sidebar-info">
+                <h3>Features</h3>
+                <ul>
+                    <li>🛠️ Execute Docker commands</li>
+                    <li>❓ Ask Docker questions</li>
+                    <li>📚 RAG-powered answers</li>
+                    <li>🔒 Safe tool execution</li>
+                </ul>
+            </div>
+            <div class="sidebar-tips">
+                <h3>Example Commands</h3>
+                <ul>
+                    <li>"run nginx on port 8080"</li>
+                    <li>"list containers"</li>
+                    <li>"show logs for redis"</li>
+                    <li>"how do volumes work?"</li>
+                </ul>
+            </div>
+        </div>
 
-<div id="chat-container">
-    <h2>Talk2Docker Chat</h2>
-    <div id="chat-box"></div>
-    <input type="text" id="user-input" placeholder="Type your message...">
-    <button id="send-btn">Send</button>
-</div>
+        <!-- Main Chat Area -->
+        <div class="main">
+            <!-- Header -->
+            <div class="header">
+                <h2>Docker Assistant Chat</h2>
+                <p>Use natural language to control Docker or ask questions</p>
+            </div>
 
-<script>
-const chatBox = document.getElementById("chat-box");
-const userInput = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
+            <!-- Chat Messages -->
+            <div class="chat-messages" id="chatMessages">
+                <div class="message assistant">
+                    <div class="message-content">
+                        👋 Hello! I'm your Docker assistant. You can ask me to run containers, view logs, or answer questions about Docker.
+                    </div>
+                </div>
+            </div>
 
-// Function to add message to chat
-function addMessage(text, sender) {
-    const msgDiv = document.createElement("div");
-    msgDiv.classList.add("message");
-    msgDiv.classList.add(sender);
-    msgDiv.textContent = (sender === "user" ? "You: " : "Bot: ") + text;
-    chatBox.appendChild(msgDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="mode-row">
+                    <label for="modeSelect">Mode</label>
+                    <select id="modeSelect" class="mode-select">
+                        <option value="docker_engine" selected>Docker Engine</option>
+                        <option value="rag">RAG (Knowledge)</option>
+                        <option value="dockerfile">Dockerfile Gen/Review</option>
+                    </select>
+                </div>
+                <form id="chatForm" onsubmit="sendMessage(event)">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="Ask about Docker or give a command..." 
+                        autocomplete="off"
+                        autofocus
+                    >
+                    <button type="submit" id="sendBtn">Send</button>
+                </form>
+                <div id="saveDockerfileBtn" class="save-dockerfile-btn" style="display:none;">
+                    <button onclick="saveDockerfile()">💾 Save Dockerfile</button>
+                </div>
+                <div class="loading-indicator" id="loading" style="display:none;">
+                    <span class="spinner"></span>
+                    <span>🧠 Analyzing query...</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-// Function to send message to backend
-function sendMessage() {
-    const text = userInput.value.trim();
-    if (!text) return;
-
-    addMessage(text, "user");  // show user message
-    userInput.value = "";      // clear input
-
-    fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text })
-    })
-    .then(res => res.json())
-    .then(data => {
-        let botMessage = "";
-
-        // Check if Docker command response
-        if(data.status === "success") {
-
-            if(data.images) {
-                botMessage += "Images:\n" + data.images.flat().join("\n") + "\n";
-            }
-            if(data.containers) {
-                botMessage += "Containers:\n" + data.containers.map(c => `${c.name} (${c.id})`).join("\n") + "\n";
-            }
-            if(data.logs) {
-                botMessage += "Logs:\n" + data.logs + "\n";
-            }
-            if(data.message) {
-                botMessage += data.message + "\n";
-            }
-
-            // Show raw JSON as well
-            botMessage += "\nRaw response:\n" + JSON.stringify(data, null, 2);
-
-        } else {
-            // AI chat or error
-            botMessage = data.response || data.message || JSON.stringify(data);
-        }
-
-        addMessage(botMessage, "bot");
-    })
-    .catch(err => addMessage("Error: " + err, "bot"));
-}
-
-// Send button click
-sendBtn.addEventListener("click", sendMessage);
-
-// Enter key press
-userInput.addEventListener("keypress", function(e){
-    if(e.key === "Enter") sendMessage();
-});
-</script>
-
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
