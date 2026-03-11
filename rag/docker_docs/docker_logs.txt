@@ -1,0 +1,26 @@
+Docker Logs
+
+Docker logs help inspect container output.
+
+View logs:
+
+docker logs <container_name>
+
+Follow logs:
+
+docker logs -f <container_name>
+
+Show last lines:
+
+docker logs --tail 100 <container_name>
+
+Logs are useful for debugging application issues inside containers.
+
+Example error patterns:
+
+connection refused
+port already in use
+database connection failed
+missing environment variable
+
+Log analysis can help identify application failures or configuration issues.

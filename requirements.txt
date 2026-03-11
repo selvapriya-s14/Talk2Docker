@@ -1,0 +1,10 @@
+ollama
+requests
+faiss-cpu
+sentence-transformers
+rich
+streamlit
+pydantic
+docker
+flask
+flask-cors

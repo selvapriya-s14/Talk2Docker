@@ -1,0 +1,36 @@
+Docker Compose
+
+Docker Compose is used to run multi-container applications.
+
+It uses a YAML configuration file called docker-compose.yml.
+
+Example compose file:
+
+version: "3"
+
+services:
+  web:
+    image: nginx
+    ports:
+      - "8080:80"
+
+  redis:
+    image: redis
+
+Run compose stack:
+
+docker compose up
+
+Run in background:
+
+docker compose up -d
+
+Stop services:
+
+docker compose down
+
+List services:
+
+docker compose ps
+
+Docker Compose simplifies managing microservices.

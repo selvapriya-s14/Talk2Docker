@@ -1,0 +1,49 @@
+Docker Basics
+
+Docker is a platform used to build, ship, and run applications in containers.
+
+A container is a lightweight, standalone executable package that includes:
+- application code
+- runtime
+- libraries
+- dependencies
+- environment configuration
+
+Containers run consistently across different environments.
+
+Important Docker components:
+
+Docker Engine
+The core runtime responsible for building and running containers.
+
+Docker Image
+A read-only template used to create containers.
+
+Docker Container
+A running instance of a Docker image.
+
+Dockerfile
+A file containing instructions to build a Docker image.
+
+Docker Registry
+A repository used to store and distribute Docker images.
+
+Common Docker Commands:
+
+Check Docker version
+docker --version
+
+List running containers
+docker ps
+
+List all containers
+docker ps -a
+
+List images
+docker images
+
+Remove container
+docker rm <container_id>
+
+Remove image
+docker rmi <image_id>

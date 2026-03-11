@@ -1,0 +1,56 @@
+Docker Troubleshooting Guide
+
+Common issues and solutions.
+
+Container keeps restarting
+
+Possible causes:
+- application crash
+- invalid configuration
+- missing environment variables
+- restart policy enabled
+
+Check logs:
+
+docker logs <container>
+
+Inspect container:
+
+docker inspect <container>
+
+Port already in use
+
+Error message:
+bind: address already in use
+
+Solution:
+Use a different port or stop the conflicting service.
+
+Container exits immediately
+
+Possible causes:
+- command finishes quickly
+- incorrect entrypoint
+- missing dependencies
+
+Check container status:
+
+docker ps -a
+
+Image not found
+
+Error:
+pull access denied
+
+Solution:
+Verify image name or login to registry.
+
+Cannot connect to container service
+
+Check port mapping:
+
+docker ps
+
+Verify container port exposure:
+
+docker inspect <container>

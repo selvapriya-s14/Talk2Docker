@@ -1,0 +1,42 @@
+Docker Run Command
+
+The docker run command creates and starts a new container from an image.
+
+Basic syntax:
+
+docker run [OPTIONS] IMAGE [COMMAND]
+
+Example:
+
+docker run nginx
+
+This command downloads the nginx image if it does not exist and starts a container.
+
+Run container in detached mode:
+
+docker run -d nginx
+
+Run container with port mapping:
+
+docker run -p 8080:80 nginx
+
+This maps host port 8080 to container port 80.
+
+Run container with name:
+
+docker run --name my-nginx nginx
+
+Run container with environment variable:
+
+docker run -e MYSQL_ROOT_PASSWORD=secret mysql
+
+Run container with volume:
+
+docker run -v /host/path:/container/path nginx
+
+Run container interactively:
+
+docker run -it ubuntu bash
+
+Detached containers run in the background.
+Interactive containers allow command execution inside the container.

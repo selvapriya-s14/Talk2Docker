@@ -1,0 +1,35 @@
+Docker Networking
+
+Docker allows containers to communicate using networks.
+
+Types of Docker networks:
+
+bridge
+default network used for containers on the same host
+
+host
+container shares host networking
+
+none
+container has no networking
+
+overlay
+used in multi-host environments like Docker Swarm
+
+Create network:
+
+docker network create my_network
+
+List networks:
+
+docker network ls
+
+Run container in network:
+
+docker run --network=my_network nginx
+
+Inspect network:
+
+docker network inspect my_network
+
+Containers in the same network can communicate using container names.

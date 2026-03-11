@@ -1,0 +1,36 @@
+Docker Volumes
+
+Docker volumes provide persistent storage for containers.
+
+Containers are ephemeral, meaning data is lost when the container is removed.
+
+Volumes store data outside the container filesystem.
+
+Create volume:
+
+docker volume create my_volume
+
+List volumes:
+
+docker volume ls
+
+Inspect volume:
+
+docker volume inspect my_volume
+
+Use volume in container:
+
+docker run -v my_volume:/data nginx
+
+Bind mount example:
+
+docker run -v /host/data:/container/data nginx
+
+Volumes are commonly used for:
+
+databases
+application data
+logs
+file uploads
+
+Volumes persist even if the container is removed.
