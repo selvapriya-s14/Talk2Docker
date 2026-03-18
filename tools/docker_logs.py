@@ -1,10 +1,21 @@
-from typing import Dict
+from typing import Dict, Optional
 import subprocess
 
 
-def docker_logs(container: str) -> Dict[str, str]:
-    """Fetch logs via WSL Docker CLI."""
-    cmd = ["wsl", "docker", "logs", "--tail", "100", container]
+def docker_logs(container: str, tail: Optional[int] = 100, follow: Optional[bool] = False) -> Dict[str, str]:
+    """Fetch logs via WSL Docker CLI.
+
+    Args:
+        container: container id or name
+        tail: number of lines from the end to show
+        follow: if True, follow logs (will not return until stopped)
+    """
+    cmd = ["wsl", "docker", "logs"]
+    if tail is not None:
+        cmd += ["--tail", str(tail)]
+    if follow:
+        cmd += ["-f"]
+    cmd.append(container)
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         if result.returncode == 0:

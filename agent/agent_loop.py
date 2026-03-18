@@ -10,7 +10,15 @@ def run_agent_turn(user_input: str, retriever: Retriever, mode_override: Optiona
     """Single agent step. Returns display data for CLI or UI."""
     if mode_override == "dockerfile":
         log_request("dockerfile", user_input)
-        return handle_dockerfile_request(user_input)
+        result = handle_dockerfile_request(user_input)
+        # Append compose + env to display when available
+        display = result.get("display", "")
+        if result.get("compose"):
+            display += f"\n\n{'='*60}\n📦 docker-compose.yml\n{'='*60}\n{result['compose']}"
+        if result.get("env"):
+            display += f"\n\n{'='*60}\n📝 .env.example\n{'='*60}\n{result['env']}"
+        result["display"] = display
+        return result
 
     if mode_override == "rag":
         log_request("rag", user_input)
@@ -47,10 +55,62 @@ def run_agent_turn(user_input: str, retriever: Retriever, mode_override: Optiona
         # Format display message
         output = result.get('output', 'Done')
         warning = result.get('warning', '')
+
+        # Special formatting for docker_ports
+        if tool == "docker_ports" and result.get("status") == "success":
+            ports = result.get("ports", [])
+            summary = result.get("summary")
+            if summary:
+                output = f"🔌 Published ports: {summary}\n"
+            else:
+                output = "🔌 No published ports found.\n"
+            for p in ports:
+                cp = p.get("container_port", "?")
+                bindings = p.get("bindings", [])
+                if bindings:
+                    for b in bindings:
+                        output += f"  {cp} → {b.get('HostIp','0.0.0.0')}:{b.get('HostPort','?')}\n"
+                else:
+                    output += f"  {cp} (exposed but not published)\n"
+
+        # Special formatting for docker_inspect
+        if tool == "docker_inspect" and result.get("status") == "success" and result.get("inspect"):
+            info = result["inspect"][0] if isinstance(result["inspect"], list) else result["inspect"]
+            name = info.get("Name", "?").lstrip("/")
+            state = info.get("State", {})
+            config = info.get("Config", {})
+            net = info.get("NetworkSettings", {})
+
+            lines = [f"🔍 Inspect: {name}"]
+            lines.append(f"  Status: {state.get('Status', '?')}")
+            lines.append(f"  Image: {config.get('Image', '?')}")
+            # Ports
+            ports = net.get("Ports", {})
+            if ports:
+                lines.append("  Ports:")
+                for cp, bindings in ports.items():
+                    if bindings:
+                        for b in bindings:
+                            lines.append(f"    {cp} → {b.get('HostIp','0.0.0.0')}:{b.get('HostPort','?')}")
+                    else:
+                        lines.append(f"    {cp} (not published)")
+            # Mounts
+            mounts = info.get("Mounts", [])
+            if mounts:
+                lines.append("  Mounts:")
+                for m in mounts:
+                    lines.append(f"    {m.get('Source', '?')} → {m.get('Destination', '?')} ({m.get('Type', '?')})")
+            # Env (show non-sensitive ones)
+            envs = config.get("Env", [])
+            if envs:
+                lines.append(f"  Env vars: {len(envs)} set")
+
+            output = "\n".join(lines)
+
         if warning:
-            display = f"{warning}\\n\\n{output}"
+            display = f"{warning}\n\n{output}"
         else:
-            display = output if not output.startswith('✅') else output
+            display = output
             
         return {
             "mode": "tool", 

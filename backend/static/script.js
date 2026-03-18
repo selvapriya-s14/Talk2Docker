@@ -9,6 +9,66 @@ let modeSelect;
 // Current mode and last response
 let currentMode = 'docker_engine';
 let lastDockerfileResponse = null;
+let requestStartTime = null;
+
+// Use suggestion chip
+function useSuggestion(text) {
+    messageInput.value = text;
+    messageInput.focus();
+    // Hide suggestion chips after use
+    const chips = document.getElementById('suggestionChips');
+    if (chips) chips.style.display = 'none';
+    // Auto-send
+    chatForm.dispatchEvent(new Event('submit'));
+}
+
+// Show context-aware follow-up suggestions
+function showFollowUpChips(tool, response) {
+    const chips = document.createElement('div');
+    chips.className = 'suggestion-chips';
+
+    const suggestions = [];
+    if (tool === 'docker_ps' || tool === 'docker_run') {
+        suggestions.push(['📊 Show stats', 'show container stats']);
+        suggestions.push(['📋 Show logs', 'show logs for ']);
+        suggestions.push(['🛑 Stop container', 'stop container ']);
+    }
+    if (tool === 'docker_images') {
+        suggestions.push(['🚀 Run image', 'run ']);
+        suggestions.push(['🗑️ Remove image', 'remove image ']);
+    }
+    if (tool === 'docker_stop') {
+        suggestions.push(['📦 List containers', 'list containers']);
+        suggestions.push(['🗑️ Remove container', 'remove container ']);
+    }
+    if (tool === 'docker_logs') {
+        suggestions.push(['🔄 Restart', 'restart container ']);
+        suggestions.push(['🔍 Inspect', 'inspect container ']);
+    }
+    if (tool === 'docker_inspect') {
+        suggestions.push(['🔌 Check ports', 'which port is container ']);
+        suggestions.push(['📋 Show logs', 'show logs for ']);
+    }
+    // Default general suggestions
+    if (suggestions.length === 0) {
+        suggestions.push(['📦 List containers', 'list containers']);
+        suggestions.push(['🖼️ Show images', 'show images']);
+    }
+
+    for (const [label, cmd] of suggestions) {
+        const btn = document.createElement('button');
+        btn.className = 'chip';
+        btn.textContent = label;
+        btn.onclick = () => {
+            messageInput.value = cmd;
+            messageInput.focus();
+        };
+        chips.appendChild(btn);
+    }
+
+    chatMessages.appendChild(chips);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
 
 // Add message to chat
 function addMessage(text, sender, stages = null) {
@@ -132,6 +192,7 @@ function sendMessage(event) {
     }, 1000);
     
     // Send to backend
+    requestStartTime = performance.now();
     fetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -143,6 +204,9 @@ function sendMessage(event) {
         loading.style.display = 'none';
         sendBtn.disabled = false;
         
+        // Calculate response time
+        const elapsed = ((performance.now() - requestStartTime) / 1000).toFixed(1);
+        
         if (data.status !== 'success') {
             const errMsg = '❌ ' + (data.message || 'Error');
             addMessage(errMsg, 'assistant');
@@ -151,7 +215,11 @@ function sendMessage(event) {
         
         // Add agent response (clean, concise)
         const response = data.response || 'Done';
-        addMessage(response, 'assistant');
+        addMessage(response + `\n⏱️ ${elapsed}s`, 'assistant');
+        
+        // Show context-aware follow-up chips
+        const tool = data.tool || '';
+        showFollowUpChips(tool, response);
         
         // Store Dockerfile if in dockerfile mode
         if (modeSelect.value === 'dockerfile' && data.dockerfile_mode === 'generate') {

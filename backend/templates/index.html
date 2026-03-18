@@ -49,6 +49,15 @@
                         👋 Hello! I'm your Docker assistant. You can ask me to run containers, view logs, or answer questions about Docker.
                     </div>
                 </div>
+                <!-- Quick-action suggestion chips -->
+                <div class="suggestion-chips" id="suggestionChips">
+                    <button class="chip" onclick="useSuggestion('list containers')">📦 List containers</button>
+                    <button class="chip" onclick="useSuggestion('show images')">🖼️ Show images</button>
+                    <button class="chip" onclick="useSuggestion('run nginx on port 8080')">🚀 Run nginx:8080</button>
+                    <button class="chip" onclick="useSuggestion('show container stats')">📊 Stats</button>
+                    <button class="chip" onclick="useSuggestion('list networks')">🌐 Networks</button>
+                    <button class="chip" onclick="useSuggestion('list volumes')">💾 Volumes</button>
+                </div>
             </div>
 
             <!-- Input Area -->

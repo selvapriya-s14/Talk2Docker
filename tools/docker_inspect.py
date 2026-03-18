@@ -2,6 +2,7 @@
 Inspect Docker container or image
 """
 import subprocess
+import json
 
 
 def docker_inspect(name: str):
@@ -15,7 +16,7 @@ def docker_inspect(name: str):
         str: Detailed JSON information
     """
     if not name or not isinstance(name, str):
-        return "Error: name is required"
+        return {"status": "error", "output": "name is required"}
     
     try:
         result = subprocess.run(
@@ -26,10 +27,15 @@ def docker_inspect(name: str):
         )
         
         if result.returncode == 0:
-            return result.stdout.strip()
+            out = result.stdout.strip()
+            try:
+                parsed = json.loads(out)
+                return {"status": "success", "inspect": parsed}
+            except Exception:
+                return {"status": "success", "output": out}
         else:
-            return f"Error inspecting: {result.stderr.strip()}"
+            return {"status": "error", "output": f"Error inspecting: {result.stderr.strip()}"}
     except subprocess.TimeoutExpired:
-        return "Error: Command timed out"
+        return {"status": "error", "output": "Command timed out"}
     except Exception as e:
-        return f"Error: {str(e)}"
+        return {"status": "error", "output": f"Error: {str(e)}"}

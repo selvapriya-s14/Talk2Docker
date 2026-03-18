@@ -15,7 +15,7 @@ def docker_rm(container_id: str):
         str: Success or error message
     """
     if not container_id or not isinstance(container_id, str):
-        return "Error: container_id is required"
+        return {"status": "error", "output": "container_id is required"}
     
     try:
         result = subprocess.run(
@@ -26,10 +26,10 @@ def docker_rm(container_id: str):
         )
         
         if result.returncode == 0:
-            return f"Container {container_id} removed successfully"
+            return {"status": "success", "output": f"✅ Container {container_id} removed successfully"}
         else:
-            return f"Error removing container: {result.stderr.strip()}"
+            return {"status": "error", "output": f"Error removing container: {result.stderr.strip()}"}
     except subprocess.TimeoutExpired:
-        return "Error: Command timed out"
+        return {"status": "error", "output": "Command timed out"}
     except Exception as e:
-        return f"Error: {str(e)}"
+        return {"status": "error", "output": f"Error: {str(e)}"}

@@ -10,9 +10,13 @@ from tools.docker_rm import docker_rm
 from tools.docker_rmi import docker_rmi
 from tools.docker_exec import docker_exec
 from tools.docker_inspect import docker_inspect
+from tools.docker_ports import docker_ports
 from tools.docker_restart import docker_restart
 from tools.docker_prune import docker_prune
 from tools.docker_pull import docker_pull
+from tools.docker_stats import docker_stats
+from tools.docker_network import docker_network
+from tools.docker_volume import docker_volume
 
 TOOLS: Dict[str, Callable] = {
     "docker_run": docker_run,
@@ -26,7 +30,11 @@ TOOLS: Dict[str, Callable] = {
     "docker_rmi": docker_rmi,
     "docker_exec": docker_exec,
     "docker_inspect": docker_inspect,
+    "docker_ports": docker_ports,
     "docker_restart": docker_restart,
     "docker_prune": docker_prune,
     "docker_pull": docker_pull,
+    "docker_stats": docker_stats,
+    "docker_network": docker_network,
+    "docker_volume": docker_volume,
 }

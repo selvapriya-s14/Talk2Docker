@@ -35,6 +35,9 @@ python app.py
 ```
 Then open: **http://localhost:5000**
 
+By default, backend auto-reloads when Python files change.
+- Disable if needed: set `AUTO_RELOAD=false` before starting backend.
+
 ## Features
 
 ✨ **Dockerfile Generation**

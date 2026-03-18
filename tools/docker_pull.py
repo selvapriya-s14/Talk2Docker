@@ -15,7 +15,7 @@ def docker_pull(image_name: str):
         str: Success or error message
     """
     if not image_name or not isinstance(image_name, str):
-        return "Error: image_name is required"
+        return {"status": "error", "output": "image_name is required"}
     
     try:
         result = subprocess.run(
@@ -26,10 +26,10 @@ def docker_pull(image_name: str):
         )
         
         if result.returncode == 0:
-            return f"Image {image_name} pulled successfully"
+            return {"status": "success", "output": f"Image {image_name} pulled successfully"}
         else:
-            return f"Error pulling image: {result.stderr.strip()}"
+            return {"status": "error", "output": f"Error pulling image: {result.stderr.strip()}"}
     except subprocess.TimeoutExpired:
-        return "Error: Pull timed out (image may be too large)"
+        return {"status": "error", "output": "Pull timed out (image may be too large)"}
     except Exception as e:
-        return f"Error: {str(e)}"
+        return {"status": "error", "output": f"Error: {str(e)}"}
